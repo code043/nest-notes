@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
@@ -26,11 +25,6 @@ export class UsersService {
       },
     });
   }
-
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
-
   async remove(userId: string) {
     await this.prisma.user.delete({
       where: { id: userId },
