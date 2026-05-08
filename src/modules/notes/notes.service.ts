@@ -24,8 +24,12 @@ export class NotesService {
     return `This action returns a #${id} note`;
   }
 
-  update(id: number, updateNoteDto: UpdateNoteDto) {
-    return `This action updates a #${id} note`;
+  async update(id: string, updateNoteDto: UpdateNoteDto) {
+    const { title, content } = updateNoteDto;
+    return await this.prisma.note.update({
+      where: { id },
+      data: { title, content },
+    });
   }
 
   remove(id: number) {
