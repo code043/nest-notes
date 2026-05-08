@@ -50,6 +50,7 @@ export class AuthService {
     const payload = {
       sub: user.id,
       role: user.role,
+      jti: crypto.randomUUID(),
     };
     const token = this.jwtService.sign(payload);
 
