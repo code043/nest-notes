@@ -8,11 +8,15 @@ import { CreateAuthDto } from './dto/create-auth.dto';
 import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
   private salt = 10;
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private jwtService: JwtService,
+  ) {}
 
   async register(createAuthDto: CreateAuthDto) {
     const { password, email } = createAuthDto;
@@ -43,7 +47,11 @@ export class AuthService {
     if (!pass) {
       throw new UnauthorizedException('Invalid credentials!');
     }
+    const payload = {
+      sub: user.id,
+    };
+    const token = this.jwtService.sign(payload);
 
-    return { user };
+    return { user: user.id, access_token: token };
   }
 }
