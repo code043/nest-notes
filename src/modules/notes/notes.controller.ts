@@ -7,7 +7,7 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
-  @Post()
+  @Post('new')
   create(@Body() createNoteDto: CreateNoteDto) {
     return this.notesService.create(createNoteDto);
   }

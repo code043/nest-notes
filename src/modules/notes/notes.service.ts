@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class NotesService {
-  create(createNoteDto: CreateNoteDto) {
-    return 'This action adds a new note';
+  constructor(private prisma: PrismaService) {}
+  async create(createNoteDto: CreateNoteDto) {
+    const { userId, title, content } = createNoteDto;
+    return await this.prisma.note.create({
+      data: { userId, title, content },
+    });
   }
 
   findAll() {
