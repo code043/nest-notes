@@ -24,7 +24,7 @@ export class NotesController {
   findAll() {
     return this.notesService.findAll();
   }
-  @Get(':userId')
+  @Get('user/:userId')
   async findAllUserNotes(@Param('userId') userId: string) {
     return await this.notesService.findAllUserNotes(userId);
   }

@@ -13,6 +13,7 @@ import { LoginAuthDto } from './dto/login-auth.dto';
 export class AuthService {
   private salt = 10;
   constructor(private prisma: PrismaService) {}
+
   async register(createAuthDto: CreateAuthDto) {
     const { password, email } = createAuthDto;
     const existingUser = await this.prisma.user.findUnique({
