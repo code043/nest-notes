@@ -9,7 +9,7 @@ export class NotesService {
   async create(createNoteDto: CreateNoteDto) {
     const { userId, title, content } = createNoteDto;
     return await this.prisma.note.create({
-      data: { userId, title, content },
+      data: { title, content, userId },
     });
   }
 
@@ -20,8 +20,14 @@ export class NotesService {
     return await this.prisma.note.findMany({ where: { userId } });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} note`;
+  async findOne(id: string) {
+    const note = await this.prisma.note.findUnique({
+      where: { id },
+    });
+    if (!note) {
+      throw new NotFoundException('Note not foun!');
+    }
+    return note;
   }
 
   async update(id: string, updateNoteDto: UpdateNoteDto) {
