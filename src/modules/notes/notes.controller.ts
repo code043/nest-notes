@@ -6,10 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { NotesService } from './notes.service';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
+import { User } from '../auth/decorators/user.decorator';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('notes')
 export class NotesController {
@@ -24,9 +27,10 @@ export class NotesController {
   findAll() {
     return this.notesService.findAll();
   }
-  @Get('user/:userId')
-  async findAllUserNotes(@Param('userId') userId: string) {
-    return await this.notesService.findAllUserNotes(userId);
+  @UseGuards(AuthGuard('jwt'))
+  @Get('user')
+  async findAllUserNotes(@User() user: any) {
+    return await this.notesService.findAllUserNotes(user.id);
   }
 
   @Get(':id')
