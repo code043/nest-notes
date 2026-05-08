@@ -13,8 +13,11 @@ export class NotesService {
     });
   }
 
-  findAll() {
-    return `This action returns all notes`;
+  async findAll() {
+    return await this.prisma.note.findMany();
+  }
+  async findAllUserNotes(userId: string) {
+    return await this.prisma.note.findMany({ where: { userId } });
   }
 
   findOne(id: number) {
