@@ -14,37 +14,37 @@ import { UpdateNoteDto } from './dto/update-note.dto';
 import { User } from '../auth/decorators/user.decorator';
 import { AuthGuard } from '@nestjs/passport';
 
+@UseGuards(AuthGuard('jwt'))
 @Controller('notes')
 export class NotesController {
   constructor(private readonly notesService: NotesService) {}
 
-  @Post('new')
-  create(@Body() createNoteDto: CreateNoteDto) {
-    return this.notesService.create(createNoteDto);
+  @Post()
+  create(@Body() createNoteDto: CreateNoteDto, @User() user: any) {
+    return this.notesService.create(createNoteDto, user.id);
   }
 
   @Get()
-  findAll() {
-    return this.notesService.findAll();
-  }
-  @UseGuards(AuthGuard('jwt'))
-  @Get('user')
-  async findAllUserNotes(@User() user: any) {
-    return await this.notesService.findAllUserNotes(user.id);
+  findAll(@User() user: any) {
+    return this.notesService.findAll(user.id);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.notesService.findOne(id);
+  findOne(@Param('id') id: string, @User() user: any) {
+    return this.notesService.findOne(id, user.id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateNoteDto: UpdateNoteDto) {
-    return this.notesService.update(id, updateNoteDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateNoteDto: UpdateNoteDto,
+    @User() user: any,
+  ) {
+    return this.notesService.update(id, updateNoteDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.notesService.remove(id);
+  remove(@Param('id') id: string, @User() user: any) {
+    return this.notesService.remove(id, user.id);
   }
 }
