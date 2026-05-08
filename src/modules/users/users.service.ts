@@ -8,7 +8,12 @@ export class UsersService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.user.findMany();
+    return this.prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+      },
+    });
   }
 
   findOne(id: number) {
