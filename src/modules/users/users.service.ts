@@ -31,7 +31,10 @@ export class UsersService {
     return `This action updates a #${id} user`;
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(userId: string) {
+    await this.prisma.user.delete({
+      where: { id: userId },
+    });
+    return { message: 'User has deleted!' };
   }
 }
