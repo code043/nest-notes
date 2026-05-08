@@ -4,8 +4,9 @@ import { UpdateAuthDto } from './dto/update-auth.dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(private prisma: PrismaService) {}
+ async register(createAuthDto: CreateAuthDto) {
+    return await this.
   }
 
   findAll() {
