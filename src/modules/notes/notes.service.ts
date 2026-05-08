@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateNoteDto } from './dto/create-note.dto';
 import { UpdateNoteDto } from './dto/update-note.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -32,7 +32,16 @@ export class NotesService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} note`;
+  async remove(id: string) {
+    const note = await this.prisma.note.findUnique({
+      where: { id },
+    });
+    if (!note) {
+      throw new NotFoundException('Note not found!');
+    }
+    await this.prisma.note.delete({
+      where: { id },
+    });
+    return { message: `Note has deleted: ${note.id}` };
   }
 }
