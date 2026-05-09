@@ -8,9 +8,12 @@ import { PrismaService } from '../../prisma/prisma.service';
 @Injectable()
 export class UsersService {
   constructor(private prisma: PrismaService) {}
-
   async findAll(user: any) {
-    if (user.role !== 'ADMIN') {
+    const exstingUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+
+    if (exstingUser && user.role !== 'ADMIN') {
       throw new ForbiddenException('Access denied!');
     }
 

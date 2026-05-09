@@ -32,6 +32,11 @@ export class AuthService {
         ...createAuthDto,
         password: hashedPassword,
       },
+      select: {
+        name: true,
+        email: true,
+        role: true,
+      },
     });
   }
 

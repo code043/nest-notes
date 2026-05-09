@@ -6,19 +6,19 @@ import { REDIS_KEYS } from 'src/common/redis/redis.constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
+  private redis;
+
   constructor(private redisService: RedisService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       secretOrKey: process.env.JWT_SECRET,
     });
+
+    this.redis = this.redisService.getClient();
   }
 
-  async validate(payload: { sub: string; role: string; jti: string }) {
-    //const token = req?.headers?.authorization?.split(' ')[1];
-
-    const redis = this.redisService.getClient();
-
-    const isBlacklisted = await redis.get(
+  async validate(payload: { sub: string; jti: string }) {
+    const isBlacklisted = await this.redis.get(
       REDIS_KEYS.JWT_BLACKLIST(payload.jti),
     );
 
@@ -28,7 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     return {
       id: payload.sub,
-      role: payload.role,
       jti: payload.jti,
     };
   }
