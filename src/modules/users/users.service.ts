@@ -9,11 +9,11 @@ import { PrismaService } from '../../prisma/prisma.service';
 export class UsersService {
   constructor(private prisma: PrismaService) {}
   async findAll(user: any) {
-    const exstingUser = await this.prisma.user.findUnique({
+    const existingUser = await this.prisma.user.findUnique({
       where: { id: user.id },
     });
 
-    if (exstingUser && user.role !== 'ADMIN') {
+    if (existingUser.role !== 'ADMIN') {
       throw new ForbiddenException('Access denied!');
     }
 
@@ -28,7 +28,10 @@ export class UsersService {
   }
 
   async findOne(userId: string, user: any) {
-    if (user.role !== 'ADMIN' && user.id !== userId) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+    if (existingUser.role !== 'ADMIN' && user.id !== userId) {
       throw new ForbiddenException('Access denied!');
     }
 
@@ -50,7 +53,10 @@ export class UsersService {
   }
 
   async remove(userId: string, user: any) {
-    if (user.role !== 'ADMIN') {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { id: user.id },
+    });
+    if (existingUser.role !== 'ADMIN') {
       throw new ForbiddenException('Only admin can delete users!');
     }
 
