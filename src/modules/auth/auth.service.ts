@@ -12,7 +12,7 @@ import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  private salt = 10;
+  private salt = process.env.BCRYPT_SALT;
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -26,7 +26,7 @@ export class AuthService {
     if (existingUser) {
       throw new ConflictException('Email already existis!');
     }
-    const hashedPassword = bcrypt.hashSync(password, this.salt);
+    const hashedPassword = bcrypt.hashSync(password, Number(this.salt));
     return await this.prisma.user.create({
       data: {
         ...createAuthDto,

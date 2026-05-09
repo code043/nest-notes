@@ -10,17 +10,19 @@ import { REDIS_KEYS } from 'src/common/redis/redis.constants';
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private redis: RedisService,
+    private redisService: RedisService,
   ) {}
 
   @Post('register')
   register(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.register(createAuthDto);
   }
+
   @Post('login')
   login(@Body() loginAuthDto: LoginAuthDto) {
     return this.authService.login(loginAuthDto);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   async logout(@Req() req: any) {
@@ -30,14 +32,14 @@ export class AuthController {
       return { message: 'Invalid token payload' };
     }
 
-    const redis = this.redis.getClient();
+    const redis = this.redisService.getClient();
 
     const ttl = Math.max((user.exp ?? 0) - Math.floor(Date.now() / 1000), 0);
 
     const key = REDIS_KEYS.JWT_BLACKLIST(user.jti);
 
     if (ttl > 0) {
-      await redis.set(key, '1', 'EX', ttl);
+      await redis.set(key, '1', { ex: ttl });
     } else {
       await redis.set(key, '1');
     }

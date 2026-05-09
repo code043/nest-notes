@@ -10,6 +10,7 @@ async function bootstrap() {
     methods: 'GET,POST,PATCH,DELETE',
   });
   app.setGlobalPrefix('api');
-  await app.listen(3000);
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
 }
 bootstrap();
