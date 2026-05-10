@@ -4,11 +4,12 @@ import { AuthController } from './auth.controller';
 import { PrismaService } from '../../prisma/prisma.service';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './guards/jwt.strategy';
+import { StringValue } from 'ms';
 @Module({
   imports: [
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'secret',
-      signOptions: { expiresIn: '1d' },
+      secret: process.env.JWT_ACCESS_SECRET || 'secret',
+      signOptions: { expiresIn: process.env.JWT_ACCESS_EXPIRES as StringValue },
     }),
   ],
   controllers: [AuthController],

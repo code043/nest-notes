@@ -9,10 +9,13 @@ import { PrismaService } from '../../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtService } from '@nestjs/jwt';
+import { StringValue } from 'ms';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class AuthService {
   private salt = process.env.BCRYPT_SALT;
+
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
@@ -20,14 +23,18 @@ export class AuthService {
 
   async register(createAuthDto: CreateAuthDto) {
     const { password, email } = createAuthDto;
+
     const existingUser = await this.prisma.user.findUnique({
       where: { email },
     });
+
     if (existingUser) {
-      throw new ConflictException('Email already existis!');
+      throw new ConflictException('Email already exists!');
     }
+
     const hashedPassword = bcrypt.hashSync(password, Number(this.salt));
-    return await this.prisma.user.create({
+
+    return this.prisma.user.create({
       data: {
         ...createAuthDto,
         password: hashedPassword,
@@ -42,23 +49,108 @@ export class AuthService {
 
   async login(loginAuthDto: LoginAuthDto) {
     const { password, email } = loginAuthDto;
+
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
+
     if (!user) {
       throw new NotFoundException('User not found!');
     }
+
     const pass = bcrypt.compareSync(password, user.password);
+
     if (!pass) {
       throw new UnauthorizedException('Invalid credentials!');
     }
+
     const payload = {
       sub: user.id,
       role: user.role,
       jti: crypto.randomUUID(),
     };
-    const token = this.jwtService.sign(payload);
 
-    return { user: user.id, access_token: token };
+    const accessToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_ACCESS_SECRET,
+      expiresIn: process.env.JWT_ACCESS_EXPIRES as StringValue,
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: process.env.JWT_REFRESH_EXPIRES as StringValue,
+    });
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        refreshToken,
+      },
+    });
+
+    return {
+      user: user.id,
+      access_token: accessToken,
+      refresh_token: refreshToken,
+    };
+  }
+
+  async refreshToken(refreshToken: string) {
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token!');
+    }
+
+    let payload;
+
+    try {
+      payload = this.jwtService.verify(refreshToken, {
+        secret: process.env.JWT_REFRESH_SECRET,
+      });
+    } catch {
+      throw new UnauthorizedException('Invalid refresh token!');
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: payload.sub },
+    });
+
+    if (!user || user.refreshToken !== refreshToken) {
+      throw new UnauthorizedException('Refresh token mismatch!');
+    }
+
+    const newAccessToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        role: user.role,
+        jti: crypto.randomUUID(),
+      },
+      {
+        secret: process.env.JWT_ACCESS_SECRET,
+        expiresIn: process.env.JWT_ACCESS_EXPIRES as StringValue,
+      },
+    );
+
+    const newRefreshToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        role: user.role,
+        jti: crypto.randomUUID(),
+      },
+      {
+        secret: process.env.JWT_REFRESH_SECRET,
+        expiresIn: process.env.JWT_REFRESH_EXPIRES as StringValue,
+      },
+    );
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: {
+        refreshToken: newRefreshToken,
+      },
+    });
+
+    return {
+      access_token: newAccessToken,
+      refresh_token: newRefreshToken,
+    };
   }
 }
