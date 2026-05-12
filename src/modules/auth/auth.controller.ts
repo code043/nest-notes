@@ -6,6 +6,7 @@ import { Response, Request } from 'express';
 import { RedisService } from '../../common/redis/redis.service';
 import { AuthGuard } from '@nestjs/passport';
 import { REDIS_KEYS } from '../../common/redis/redis.constants';
+const isProd = process.env.NODE_ENV === 'production';
 
 @Controller('auth')
 export class AuthController {
@@ -29,8 +30,8 @@ export class AuthController {
 
     res.cookie('refresh_token', refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'none',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
@@ -52,8 +53,8 @@ export class AuthController {
 
     res.cookie('refresh_token', result.refresh_token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'none',
       path: '/',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
