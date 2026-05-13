@@ -1,11 +1,11 @@
-import { Controller, Post, Body, Req, Res, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
-import { Response, Request } from 'express';
 import { RedisService } from '../../common/redis/redis.service';
 import { AuthGuard } from '@nestjs/passport';
 import { REDIS_KEYS } from '../../common/redis/redis.constants';
+import { Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -20,49 +20,28 @@ export class AuthController {
   }
 
   @Post('login')
-  async login(
-    @Body() loginAuthDto: LoginAuthDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async login(@Body() loginAuthDto: LoginAuthDto) {
     const { access_token, refresh_token, user } =
       await this.authService.login(loginAuthDto);
-
-    res.cookie('refresh_token', refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
 
     return {
       user,
       access_token,
+      refresh_token,
     };
   }
 
   @Post('refresh')
-  async refresh(
-    @Req() req: Request,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async refresh(@Req() req: Request) {
     const refreshToken = req.cookies?.refresh_token;
 
     const result = await this.authService.refreshToken(refreshToken);
 
-    res.cookie('refresh_token', result.refresh_token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
     return {
       access_token: result.access_token,
+      refresh_token: result.refresh_token,
     };
   }
-
   @UseGuards(AuthGuard('jwt'))
   @Post('logout')
   async logout(@Req() req: any) {
