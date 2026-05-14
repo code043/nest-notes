@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Req, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -6,6 +6,7 @@ import { RedisService } from '../../common/redis/redis.service';
 import { AuthGuard } from '@nestjs/passport';
 import { REDIS_KEYS } from '../../common/redis/redis.constants';
 import { Request } from 'express';
+import { Auth } from './decorators/auth-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +14,11 @@ export class AuthController {
     private readonly authService: AuthService,
     private redisService: RedisService,
   ) {}
-
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  getMe(@Auth('id') id: string) {
+    return this.authService.getAuthenticatedUser(id);
+  }
   @Post('register')
   register(@Body() createAuthDto: CreateAuthDto) {
     return this.authService.register(createAuthDto);
