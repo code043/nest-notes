@@ -1,4 +1,12 @@
-import { Controller, Post, Body, Req, UseGuards, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Req,
+  UseGuards,
+  Get,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateAuthDto } from './dto/create-auth.dto';
 import { LoginAuthDto } from './dto/login-auth.dto';
@@ -38,7 +46,13 @@ export class AuthController {
 
   @Post('refresh')
   async refresh(@Req() req: Request) {
-    const refreshToken = req.cookies?.refresh_token;
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException('Refresh token ausente');
+    }
+
+    const refreshToken = authHeader.split(' ')[1];
 
     const result = await this.authService.refreshToken(refreshToken);
 
