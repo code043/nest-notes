@@ -15,7 +15,7 @@ API REST para gerenciamento de usuários e notas, permitindo criação, edição
 
 ```bash
 git clone https://github.com/code043/nest-notes.git
-cd nest_notes
+cd nest-notes
 npm install
 npm run dev
 ```
