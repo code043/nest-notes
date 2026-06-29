@@ -24,15 +24,15 @@ npm run dev
 
 ### VSCode
 - **Install:** https://code.visualstudio.com/download  
-- **Repository:** https://github.com/microsoft/vscode  
+- **Repository:** https://github.com/microsoft/vscode/  
 
 ### Node
 - **Install:** https://nodejs.org/en/download/package-manager/current  
-- **Repository:** https://github.com/nodejs/node  
+- **Repository:** https://github.com/nodejs/node/ 
 
 ### Nest
 - **Install:** https://docs.nestjs.com/recipes/serve-static#installation 
-- **Repository:** https://github.com/nestjs/nest
+- **Repository:** https://github.com/nestjs/nest/
 
 ### Prisma
 - **Install:** https://www.prisma.io/docs
