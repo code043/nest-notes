@@ -18,10 +18,10 @@ git clone https://github.com/code043/nest-notes.git
 cd nest-notes
 npm install
 npm run dev
+
 ```
 
 ## Resources
-
 
 ### VSCode
 - **Install:** https://code.visualstudio.com/download  
